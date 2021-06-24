@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
     hosta.vm.provision "shell", path: "host-a.sh"
     hosta.vm.provider "virtualbox" do |vb|
      vb.name = "host-a"
-     vb.memory = 512
+     vb.memory = 256
     end
   end
   config.vm.define "host-b" do |hostb|
@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
     hostb.vm.provision "shell", path: "host-b.sh"
     hostb.vm.provider "virtualbox" do |vb|
      vb.name = "host-b" 
-     vb.memory = 512
+     vb.memory = 256
     end
   end
 end

@@ -6,8 +6,9 @@ apt-get install -y openvswitch-common openvswitch-switch apt-transport-https ca-
 #Switch ports config
 sudo ovs-vsctl add-br switch
 sudo ovs-vsctl add-port switch enp0s8
-sudo ovs-vsctl add-port switch enp0s9 tag="2"
-sudo ovs-vsctl add-port switch enp0s10 tag="3"
+sudo ovs-vsctl add-port switch enp0s9 tag="1"
+sudo ovs-vsctl add-port switch enp0s10 tag="2"
+#Using Linux Traffic Control to limitate the bandwidth
 sudo tc qdisc add dev enp0s8 root tbf rate 1mbit burst 64kbit latency 200ms
 sudo tc qdisc add dev enp0s9 root tbf rate 1mbit burst 64kbit latency 200ms
 sudo tc qdisc add dev enp0s10 root tbf rate 1mbit burst 64kbit latency 200ms
