@@ -12,14 +12,14 @@
 
 ## Design:
 
-<img src="NetworkSchema.png" width="650">
+<img src="utils/MonitorVNetwork.png" width="600">
 
 Come si può notare dall'immagine sopra illustrata, la nostra rete network è composta da: 
 - 1 router
 - 1 switch
 - 2 host: host-a e host-b connessi allo switch
 
-### SUBNET:
+## SUBNET:
 
 - Subnet 1: 192.168.0.0/23 - sottorete presente tra host-a e router
 - Subnet 1: 192.168.2.0/23 - sottorete presente tra host-b e router
@@ -29,7 +29,7 @@ Abbiamo scelto di utilizzare delle sottoreti più ampie invece che limitarci a d
 Abbiamo deciso inoltre di creare due VLAN per distinguere subnet host-a e subnet host-b, codificandole rispettivamente con il tag 1 e 2. 
 
 
-### IP MAP E VLAN:
+## IP MAP E VLAN:
 
 | DEVICE            | IP                | INTERFACE           | SUBNET       |
 | -------------     | -------------     | -------------       |------------- |
@@ -39,7 +39,7 @@ Abbiamo deciso inoltre di creare due VLAN per distinguere subnet host-a e subnet
 | host-b            | 192.168.2.2       | enp0s8              |     2        |
 
 
-### VAGRANT FILE E FILE DI CONFIGURAZIONE .sh
+## VAGRANT FILE E FILE DI CONFIGURAZIONE .sh
 
 Nel file chiamato Vagrantfile è presente tutta la configurazione di Vagrant. Più precisamente all'interno del file troviamo le impostazioni per ogni macchina virtuale.
 
@@ -79,7 +79,7 @@ Successivamente è stato necessario abilitare le connessione del router con le d
 ''' sudo ip link add link enp0s8 name enp0s8.1 type vlan id 1
     sudo ip link add link enp0s8 name enp0s8.2 type vlan id 2 '''
 
-### COME LIMITARE L'AMPIEZZA DI BANDA DELLE CONNESSIONI?
+## COME LIMITARE L'AMPIEZZA DI BANDA DELLE CONNESSIONI?
 
 Una delle richieste del progetto era proprio quelle di avere delle connessioni con ampiezze di banda limitate. Per fare questo abbiamo utilizzato Linux Traffic Control, un utility di Linux creata apposta per poter gestire comodamente il traffico dati. Nello specifico abbiamo utilizzato il seguente comando:
 
@@ -92,5 +92,25 @@ Con questo comando utilizziamo il token bucket filter per impostare in ogni conn
 
 Una volta specificato in ogni macchina virtuale per ogni connessione, abbiamo una rete dove l'ampiezza di banda è limitata, in linea con la richiesta del progetto.
 
-### COME ANALIZZARE LO STATO DEL SISTEMA?
+## COME ANALIZZARE LO STATO DEL SISTEMA?
 
+Per riuscire ad analizzare correttamente lo stato del sistema, raccogliendo le informazioni relative, abbiamo creato uno script ad hoc dal nome tester.sh. 
+
+Grazie a questo script è possibile raccogliere informazioni riguardo alle singole macchine virtuali, visualizzarle oppure controllare che l'ampiezza di banda sia limitata per ogni connessione. 
+
+Per raccogliere le informazioni abbiamo utilizzato il seguente comando, specifico di VirtualBox, che dà come output le informazioni necessarie.
+
+'''VBoxManage metrics collect --period 4 --samples 1 host-a CPU/Loader/User,CPU/Load/Kernel,RAM/Usage/Used,Disk/Usage/Used,Net/Rate/Rx,Net/Rate/Tx,Guest/RAM/Usage/Total,Guest/RAM/Usage/Free | tee host-a.txt '''
+
+Il tutto viene poi salvato in un file di testo che è possibile visualizzare con il rispettivo comando di visualizzazione sempre all'interno dello script "tester.sh"
+
+Infine è possibile visualizzare che l'ampiezza di banda è limitata, all'interno di una qualunque connessione, attraverso una specifica opzione dove, selezionando la macchina virtuale da esaminare e la connessione, si lancia il seguente comando direttamente all'interno della macchina virtuale e si ricevono le informazioni richieste come output da terminale.
+
+''' vagrant ssh host-a -c "sudo tc qdisc show dev enp0s8" '''
+
+Per fare tutto questo basta accedere alla cartella contenente il progetto da un terminale e lanciare il comando "bash tester.sh", da qui ci sarà un menù interattivo per poter effettuare le procedure di analisi descritte precendentemente.
+
+# Fonti 
+
+https://netbeez.net/blog/how-to-use-the-linux-traffic-control/
+https://docs.oracle.com/en/virtualization/virtualbox/6.0/user/vboxmanage-metrics.html
